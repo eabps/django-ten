@@ -1,0 +1,9 @@
+{% extends 'html/base.html' %}
+
+{% block body %}
+   <ul>
+       {% for ss in scheduled_services %}
+            <li>{{ ss }} ({{ ss.tenant }})</li>
+       {% endfor %}
+   </ul> 
+{% endblock %}
