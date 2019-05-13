@@ -121,23 +121,6 @@ class TenantMiddleware:
         return self.process_response(request, response)
     
     _threadmap = {}
-
-    """
-    @classmethod
-    def set_tenant(cls):
-        cls._threadmap[threading.get_ident()] = SimpleLazyObject(lambda: get_tenant(request))
-        '''
-        try:
-            #collaboration = Collaboration.objects.get(user=user, active_now=True)
-            #tenant = collaboration.tenant
-            #cls._threadmap[threading.get_ident()] = SimpleLazyObject(collaboration.tenant)
-            cls._threadmap[threading.get_ident()] = SimpleLazyObject(lambda: get_tenant(request))
-        except Collaboration.DoesNotExist:
-            print('2 - NO TENANT ACTIVATE - REDIRECT TO CHOICE TENANT')
-            from . exceptions import NotTenantActivate
-            return NotTenantActivate
-        '''
-    """
   
     def process_request(self, request):
         request.set_tenant = getattr(settings, 'SET_TENANT')

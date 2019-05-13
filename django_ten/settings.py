@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
 ###### DJANGO TEN ######
 COLLABORATION_MODEL = 'test_ten.Collaboration'
 TENANT_MODEL = 'test_ten.Tenant'
-SELECT_TENANT_URL = '/'
+SELECT_TENANT_URL = '/tenant/select/'
 SET_TENANT = 'by_user' # by_url or by_user
 
 from test_ten.helpers import get_slug
