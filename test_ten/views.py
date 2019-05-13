@@ -67,7 +67,7 @@ def tenant_create(request):
 
         if form.is_valid():
             form.save()
-            Collaboration.objects.create(tenant=form.instance)
+            Collaboration.objects.create(tenant=form.instance, owner=True)
             #tenant_create(form, colaboration_data)
       
             return redirect('home')

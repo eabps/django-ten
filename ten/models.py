@@ -86,9 +86,6 @@ class CollaborationBase(models.Model):
                     self.user = get_current_user()
             except Collaboration.user.RelatedObjectDoesNotExist:
                 self.user = get_current_user()
-            
-            if len(Collaboration.objects.filter(tenant=self.tenant, owner=True)) < 1:
-                self.owner = True
         else:
             print('COLLABORATION UPDATE')
             if kwargs.get('tenant'):
