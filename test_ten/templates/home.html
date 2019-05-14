@@ -1,18 +1,18 @@
 {% extends 'html/base.html' %}
 
 {% block body %}
-    {% if tenancys|length > 0 %}
+    {% if tenants|length > 0 %}
         <ul>
-        {% for t in tenancys %}
+        {% for t in tenants %}
             <li><a href="{{ t.get_active_url }}">{{ t.name }}</a></li>
         {% endfor %}
         </ul>
     {% endif %}
 
     {% if user.is_authenticated %}
-        <a href="{% url 'tenant_create' %}">Create Teancy</a>
-        <a href="{% url 'patient_create' %}">Create Patient</a>
-        <a href="{% url 'scheduled_service_create' %}">Create Scheduled</a>
-        <a href="{% url 'scheduled_service_list' %}">Schedules</a>
+        <a class="btn btn-outline-dark" href="{% url 'tenant_create' %}" role="button">Create Teanat</a>
+        <a class="btn btn-outline-dark" href="{% url 'patient_create' %}" role="button">Create Patient</a>
+        <a class="btn btn-outline-dark" href="{% url 'scheduled_service_create' %}" role="button">Create Scheduled</a>
+        <a class="btn btn-outline-dark" href="{% url 'scheduled_service_list' %}" role="button">Schedules</a>
     {% endif %}
 {% endblock %}

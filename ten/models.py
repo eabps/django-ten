@@ -19,7 +19,7 @@ class ForOneTenant(models.Model):
         abstract = True
     
     def save(self, tenant=None, *args, **kwargs):
-        self.tenant = get_current_tenant() if tenant is None else tenant
+        if tenant is None: self.tenant = get_current_tenant()
         super().save(*args, **kwargs)
 
 
@@ -34,6 +34,17 @@ class ForManyTenants(models.Model):
 
     class Meta:
         abstract = True
+    
+    def save(self, tenants=[], *args, **kwargs):
+        tenants.append(get_current_tenant())
+        tenants = set(tenants)
+        print(tenants)
+        try:
+            super().save(*args, **kwargs)
+            self.tenant.add(*tenants)
+        except ValueError:
+            from ten.helpers.models import Tenant
+            raise ValueError('The tenants parameter should receive a list of objects {}'.format(Tenant))
 
 
 class CollaborationBase(models.Model):
@@ -64,9 +75,10 @@ class CollaborationBase(models.Model):
             c.save()
     
     def activate(self, user=None):
-        user = get_current_user() if user is None else user
+        if user is None: user = get_current_user()
 
-        from ten.helpers.collaboration import Collaboration
+        from ten.helpers.models import Collaboration
+        
         collaborations = Collaboration.objects.filter(user=user, active_now=True)
         self.bulk_deactivate(collaborations)
 
@@ -74,24 +86,16 @@ class CollaborationBase(models.Model):
         self.save()
     
     def save(self, *args, **kwargs):
-        if not self.id:
-            print('COLLABORATION CREATE')
-            self.tenant = kwargs.get('tenant') if kwargs.get('tenant') is not None else self.tenant
-            if kwargs.get('user') is not None: self.user = kwargs.get('user')
-            
-            from ten.helpers.collaboration import Collaboration
-            
-            try:
-                if self.user is None:
-                    self.user = get_current_user()
-            except Collaboration.user.RelatedObjectDoesNotExist:
-                self.user = get_current_user()
-        else:
-            print('COLLABORATION UPDATE')
-            if kwargs.get('tenant'):
-                self.tenant = kwargs.get('tenant')
-            if kwargs.get('user'):
-                self.user = kwargs.get('user')
+        # CREATE OR UPDATE
+        if kwargs.get('tenant'): self.tenant = kwargs.get('tenant')
+        if kwargs.get('user'): self.user = kwargs.get('user')
+
+        from ten.helpers.models import Collaboration
+
+        try:
+            if self.user is None: self.user = get_current_user()
+        except Collaboration.user.RelatedObjectDoesNotExist:
+            self.user = get_current_user()
 
         super().save(*args, **kwargs)
 
@@ -109,20 +113,19 @@ class TenantBase(models.Model):
             self.slug = self.get_unique_slug()
         super().save(*args, **kwargs)
 
-    
     def get_unique_slug(self):
         import uuid
         return str(uuid.uuid4())
 
     def activate(self, user=None):
-        from ten.helpers.collaboration import Collaboration
+        from ten.helpers.models import Collaboration
         user = get_current_user() if user is None else user
         collaboration = Collaboration.objects.get(tenant=self, user=user)
         collaboration.activate(user)
     
     @property
     def owner(self):
-        from ten.helpers.collaboration import Collaboration
+        from ten.helpers.models import Collaboration
         collaboration = Collaboration.original.get(tenant=self, owner=True)
         owner = collaboration.user
         return owner

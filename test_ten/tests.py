@@ -46,13 +46,7 @@ class SimpleTest(TestCase):
         self.assertRedirects(response, '/tenant/select/')
 
         # with user and withless actived tenant
-        client = Client()
         
-        request = self.request_factory.get('/patient/create/')
-        request.user = self.user
-        client.request = request
-        response = client.get('/patient/create/')
-        self.assertRedirects(response, '/tenant/select/')
 
     # CORRENT TENANT
     

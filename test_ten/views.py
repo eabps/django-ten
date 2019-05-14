@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 from ten.decorators import tenant_required
+from ten.helpers.tenant import get_tenants
 
 from . models import Collaboration, Tenant, ScheduledService, Patient
 from . forms import CreateUserForm, TenantForm, PatientForm, ScheduledServiceForm
@@ -21,8 +22,7 @@ def home(request):
     
     if request.user.is_authenticated:
         print('authenticated')
-        collaborations = Collaboration.objects.filter(user__id=int(request.user.id))
-        context['tenancys'] = [c.tenant for c in collaborations]
+        context['tenants'] = get_tenants()
 
     return render(request, template_name, context)
 
@@ -68,8 +68,6 @@ def tenant_create(request):
         if form.is_valid():
             form.save()
             Collaboration.objects.create(tenant=form.instance, owner=True)
-            #tenant_create(form, colaboration_data)
-      
             return redirect('home')
     else:
         form = TenantForm()
@@ -91,10 +89,7 @@ def patient_create(request):
         form = PatientForm(request.POST)
 
         if form.is_valid():
-            tenant = request.tenant
-            patient = form.save(commit=False)
-            patient.save()
-            patient.tenant.add(tenant)
+            form.save()
 
     form = PatientForm()
     

@@ -59,11 +59,12 @@ def get_user(request):
 
     if hasattr(request, 'user') and user is None:
         print('SESSION')
-        # from ten.helpers.collaboration import User
+        # from ten.helpers.models import User
         user = get_user_by_django(request)
         
     user = AnonymousUser() if user is None else user
     print('user by get_user: ', user)
+    
     return user
 
 
@@ -78,8 +79,8 @@ def get_tenant(request):
         user = get_user(request)
 
         if user:
+            from ten.helpers.models import Collaboration
             try:
-                from ten.helpers.collaboration import Collaboration
                 collaboration = Collaboration.objects.get(user=user, active_now=True)
                 tenant = collaboration.tenant
             except Collaboration.DoesNotExist:
@@ -91,7 +92,7 @@ def get_tenant(request):
     if set_tenant == 'by_url':
         print(':::: TENANT BY URL ::::')
         print('XXXXXXXXXXX: ', request.get_host())
-        from ten.helpers.collaboration import Tenant
+        from ten.helpers.models import Tenant
         slug = settings.SLUG_TENANT(request.get_host())
         print('SLUG: ', slug)
         try:
@@ -143,7 +144,7 @@ class TenantMiddleware:
             self._threadmap[threading.get_ident()]['tenant'] = request.tenant
 
             try:
-                from ten.helpers.collaboration import Collaboration
+                from ten.helpers.models import Collaboration
                 collaboration = Collaboration.objects.get(user=request.user, tenant=request.tenant)
             except (Collaboration.DoesNotExist, TypeError):
                 request.user = AnonymousUser()
