@@ -89,6 +89,7 @@ def patient_create(request):
         form = PatientForm(request.POST)
 
         if form.is_valid():
+            print('SDFDSDF')
             form.save()
 
     form = PatientForm()

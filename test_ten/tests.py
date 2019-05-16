@@ -8,7 +8,7 @@ from ten.middlewares import TenantMiddleware
 from test_ten import views
 from test_ten.models import Tenant, Collaboration
 
-
+"""
 class SimpleTest(TestCase):
     def setUp(self):
         self.request_factory = RequestFactory()
@@ -36,23 +36,30 @@ class SimpleTest(TestCase):
         self.assertEqual(200, response.status_code)
     
     def test_tenant_required(self):
-        """
-        test views with decorator @tenant_required
-        """
-
         # with announimous user and withless actived tenant
         client = Client()
         response = client.get('/patient/create/')
         self.assertRedirects(response, '/tenant/select/')
 
         # with user and withless actived tenant
-        
+ """       
 
     # CORRENT TENANT
     
     # TEST CORRENT USER
 
     # TEST DATA ISOLATION
+class DataIsolationTest(TestCase):
+    def setUp(self):
+        self.orphan_tenant = Tenant.objects.create(name='Orphan Tenant', slug='orphan')
+        self.one_tenant = Tenant.objects.create(name='One Tenant', slug='one')
+
+        self.collaboration = Collaboration.objects.create(
+            tenant = self.one_tenant,
+            user = self.user,
+            owner = True
+        )
+
 
     # TEST TOKEN
 

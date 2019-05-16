@@ -21,7 +21,7 @@ class ForManyTenantsManager(models.Manager):
         return super(ForOneTenantManager, self).get_queryset(*args, **kwargs)
 
     def get_queryset(self, user=None, tenant=None, *args, **kwargs):
-        tenant = get_current_tenant() if tenant is None else tenant
+        if tenant is None: tenant = get_current_tenant()
         if tenant:
             from . helpers.models import Collaboration
             collaborations = Collaboration.original.filter(user=tenant.owner, owner=True)

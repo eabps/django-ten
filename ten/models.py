@@ -28,6 +28,7 @@ class ForManyTenants(models.Model):
     Abstract class for class with relation many to many (tenants).
     '''
     tenant = models.ManyToManyField(settings.TENANT_MODEL, verbose_name='Tenant')
+    #is_shared = models.BooleanField(default=True, verbose_name='Is shared')
 
     objects = ForManyTenantsManager()
     original = models.Manager() # The default django model manager.
@@ -36,9 +37,12 @@ class ForManyTenants(models.Model):
         abstract = True
     
     def save(self, tenants=[], *args, **kwargs):
+        print('SAVE ***************')
+        print('*tenants:', tenants)
         tenants.append(get_current_tenant())
-        tenants = set(tenants)
-        print(tenants)
+        tenants = list(set(tenants))
+        print('**tenants:', tenants)
+
         try:
             super().save(*args, **kwargs)
             self.tenant.add(*tenants)
@@ -51,7 +55,7 @@ class CollaborationBase(models.Model):
     tenant = models.ForeignKey(settings.TENANT_MODEL, on_delete=models.CASCADE, verbose_name='Tenant')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='User')
     owner = models.BooleanField(default=False, verbose_name='Owner')
-    active_now = models.BooleanField(default=False, verbose_name='Active Now')
+    _is_active = models.BooleanField(default=False, verbose_name='Is Active')
 
     objects = CollaborationBaseManager()
     original = models.Manager() # The default django model manager.
@@ -62,8 +66,12 @@ class CollaborationBase(models.Model):
         verbose_name = 'Collaboration'
         verbose_name_plural = 'Collaborations'
     
+    @property
+    def is_active(self):
+        return self._is_active
+    
     def deactivate(self, save=False):
-        self.active_now = False
+        self._is_active = False
         
         if save is True:
             self.save()
@@ -71,18 +79,17 @@ class CollaborationBase(models.Model):
     @transaction.atomic
     def bulk_deactivate(self, collaborations):
         for c in collaborations:
-            c.active_now = False
-            c.save()
+            c.deactivate(save=True)
     
     def activate(self, user=None):
         if user is None: user = get_current_user()
 
         from ten.helpers.models import Collaboration
         
-        collaborations = Collaboration.objects.filter(user=user, active_now=True)
+        collaborations = Collaboration.objects.filter(user=user, _is_active=True)
         self.bulk_deactivate(collaborations)
 
-        self.active_now = True
+        self._is_active = True
         self.save()
     
     def save(self, *args, **kwargs):

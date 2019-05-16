@@ -81,7 +81,7 @@ def get_tenant(request):
         if user:
             from ten.helpers.models import Collaboration
             try:
-                collaboration = Collaboration.objects.get(user=user, active_now=True)
+                collaboration = Collaboration.objects.get(user=user, _is_active=True)
                 tenant = collaboration.tenant
             except Collaboration.DoesNotExist:
                 pass
