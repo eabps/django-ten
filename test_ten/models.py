@@ -38,7 +38,7 @@ class Patient(ForManyTenants):
         verbose_name_plural = 'Patients'
     
     def __str__(self):
-        return "{}".format(self.name)
+        return "{} {}".format(self.name, self.id)
 
 
 class ScheduledService(ForOneTenant):

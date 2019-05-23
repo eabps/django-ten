@@ -24,10 +24,13 @@ class ForOneTenant(models.Model):
 
 
 class ForManyTenants(models.Model):
+    # Falta sobrescrever o add (ob.tenants.add()) de modo que seja possível add somente tenants do mesmo proprientário
     '''
     Abstract class for class with relation many to many (tenants).
     '''
-    tenant = models.ManyToManyField(settings.TENANT_MODEL, verbose_name='Tenant')
+
+
+    tenants = models.ManyToManyField(settings.TENANT_MODEL, verbose_name='Tenant')
     #is_shared = models.BooleanField(default=True, verbose_name='Is shared')
 
     objects = ForManyTenantsManager()
@@ -36,19 +39,17 @@ class ForManyTenants(models.Model):
     class Meta:
         abstract = True
     
-    def save(self, tenants=[], *args, **kwargs):
-        print('SAVE ***************')
-        print('*tenants:', tenants)
-        tenants.append(get_current_tenant())
-        tenants = list(set(tenants))
-        print('**tenants:', tenants)
+    def save(self, add_current_tenant=True, *args, **kwargs):
+        super().save(*args, **kwargs)
 
-        try:
-            super().save(*args, **kwargs)
-            self.tenant.add(*tenants)
-        except ValueError:
-            from ten.helpers.models import Tenant
-            raise ValueError('The tenants parameter should receive a list of objects {}'.format(Tenant))
+        if add_current_tenant:
+            if get_current_tenant():
+                self.tenants.add(get_current_tenant())
+            else:
+                from ten.helpers.models import Tenant
+                self.delete()
+                tenant = Tenant()
+                raise ValueError("get_current_tenant() returned None. To save an instance of {} unlinked from {}, use instance.save(add_current_tenant=False)".format(self.__class__, tenant.__class__))
 
 
 class CollaborationBase(models.Model):

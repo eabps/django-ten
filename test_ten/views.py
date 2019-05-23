@@ -89,8 +89,11 @@ def patient_create(request):
         form = PatientForm(request.POST)
 
         if form.is_valid():
-            print('SDFDSDF')
             form.save()
+            #Patient.objects.create(name='Za')
+            #Patient.objects.create(name='Ze', add_current_tenant=False)
+        else:
+            print('Form is not valid')
 
     form = PatientForm()
     
