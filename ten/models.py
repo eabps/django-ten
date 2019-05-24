@@ -24,11 +24,10 @@ class ForOneTenant(models.Model):
 
 
 class ForManyTenants(models.Model):
-    # Falta sobrescrever o add (ob.tenants.add()) de modo que seja possível add somente tenants do mesmo proprientário
+    # Falta sobrescrever o add (obj.tenants.add()) de modo que seja possível add somente tenants do mesmo proprientário
     '''
     Abstract class for class with relation many to many (tenants).
     '''
-
 
     tenants = models.ManyToManyField(settings.TENANT_MODEL, verbose_name='Tenant')
     #is_shared = models.BooleanField(default=True, verbose_name='Is shared')
