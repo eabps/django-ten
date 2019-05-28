@@ -29,15 +29,18 @@ from rest_framework_simplejwt.views import (
 router = routers.DefaultRouter()
 router.register(r'scheduledservices', ScheduledServiceViewSet, basename='ScheduledService')
 
-urlpatterns = [
-    path('api/', include(router.urls)),
+api_patterns = [
+    path('', include(router.urls)),
+    # https://github.com/davesque/django-rest-framework-simplejwt#installation
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+]
 
+urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('test_ten.urls'), name='test_ten'),
-
-    # https://github.com/davesque/django-rest-framework-simplejwt#installation
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    
+    path('v1/', include(api_patterns)),
 ]
