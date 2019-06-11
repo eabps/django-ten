@@ -156,7 +156,17 @@ class TenantMiddleware:
         return request
 
     
-    def process_response(self, request, response):
+    def process_response(self, request, response):    
+        try:
+            del request.user
+        except AttributeError:
+            pass
+
+        try:
+            del request.tenant
+        except AttributeError:
+            pass
+
         try:
             del request.set_tenant
         except AttributeError:
@@ -166,6 +176,7 @@ class TenantMiddleware:
             del self._threadmap[threading.get_ident()]
         except KeyError:
             pass
+        
         return response
     
     def process_exception(self, request, exception):
