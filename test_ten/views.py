@@ -67,7 +67,7 @@ def tenant_create(request):
 
         if form.is_valid():
             form.save()
-            Collaboration.objects.create(tenant=form.instance, owner=True)
+            Collaboration.objects.create(tenant=form.instance, user=request.user, owner=True)
             return redirect('home')
     else:
         form = TenantForm()
@@ -110,11 +110,19 @@ def scheduled_service_create(request):
         'subtitle': 'Create new scheduled service',
     }
 
+    print('RM: ', request.method)
+
     if request.method == 'POST':
+        print('POSSSSST')
         form = ScheduledServiceForm(request.POST)
 
         if form.is_valid():
             form.save()
+            print('SAVVVVVE')
+        else:
+            print('Form is not valid')
+    else:
+        print('NOTTTTTTTTT POST')
 
 
     form = ScheduledServiceForm()

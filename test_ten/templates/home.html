@@ -4,7 +4,8 @@
     {% if tenants|length > 0 %}
         <ul>
         {% for t in tenants %}
-            <li><a href="{{ t.get_active_url }}">{{ t.name }}</a></li>
+            <li>
+                <a href="{{ t.get_active_url }}">{{ t.name }}</a> {% if t.is_active == True %} [a] {% endif %} </li>
         {% endfor %}
         </ul>
     {% endif %}

@@ -10,6 +10,9 @@ class ForOneTenantManager(models.Manager):
     def get_queryset(self, tenant=None, *args, **kwargs):
         tenant = get_current_tenant() if tenant is None else tenant
 
+        print('********** get_queryset by ForOneTenantManager **********')
+        print('Tenant:', tenant)
+
         if tenant:
             return super(ForOneTenantManager, self).get_queryset(*args, **kwargs).filter(tenant=tenant)
         
@@ -51,6 +54,7 @@ class CollaborationBaseManager(models.Manager):
         return super(CollaborationBaseManager, self).get_queryset(*args, **kwargs)
     
     def get_queryset(self, user=None, *args, **kwargs):
+        print(get_current_user())
         user = get_current_user() if user is None else user
 
         print('UUSER: ', user)

@@ -43,7 +43,7 @@ def get_user_by_token(request):
     elif token_flag =='drfpasswordless':
         raise NotImplementedError('drfpasswordless is not implemented yet at django-ten')
     
-    user = AnonymousUser() if user is None else user
+    if user is None: user = AnonymousUser()
     return user
 
 
@@ -62,8 +62,8 @@ def get_user(request):
         # from ten.helpers.models import User
         user = get_user_by_django(request)
         
-    user = AnonymousUser() if user is None else user
-    print('user by get_user: ', user)
+    if user is None: user = AnonymousUser()
+    print('get_user: ', user)
     
     return user
 
@@ -91,7 +91,7 @@ def get_tenant(request):
     
     if set_tenant == 'by_url':
         print(':::: TENANT BY URL ::::')
-        print('XXXXXXXXXXX: ', request.get_host())
+        print('request.get_host(): ', request.get_host())
         from ten.helpers.models import Tenant
         slug = settings.SLUG_TENANT(request.get_host())
         print('SLUG: ', slug)
@@ -134,21 +134,24 @@ class TenantMiddleware:
         self._threadmap[threading.get_ident()] = {'user': request.user, 'tenant': None}
 
         if request.set_tenant == 'by_user':
-            print('>> by_user <<')
+            print('BY USER')
             request.tenant = None if user.is_anonymous else tenant
-            self._threadmap[threading.get_ident()]['tenant'] = request.tenant
         
-        if request.set_tenant == 'by_url':
-            print('>> by_url <<')
+        elif request.set_tenant == 'by_url':
+            print('BY URL')
             request.tenant = tenant
-            self._threadmap[threading.get_ident()]['tenant'] = request.tenant
+        
+        print('tenant: ', request.tenant)
+        print('user: ', request.user)
+        self._threadmap[threading.get_ident()]['tenant'] = request.tenant
 
-            try:
+        try:
+            if tenant is not None:
                 from ten.helpers.models import Collaboration
-                collaboration = Collaboration.objects.get(user=request.user, tenant=request.tenant)
-            except (Collaboration.DoesNotExist, TypeError):
-                request.user = AnonymousUser()
-                self._threadmap[threading.get_ident()]['user'] = request.user
+                collaboration = Collaboration.objects.get(tenant=tenant, user=user)
+                collaboration.activate()
+        except (Collaboration.DoesNotExist, TypeError):
+            pass
 
         return request
 

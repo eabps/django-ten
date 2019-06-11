@@ -30,5 +30,4 @@ class ScheduledServiceForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(ScheduledServiceForm, self).__init__(*args, **kwargs)
-        from . models import Patient
         self.fields['patient'].queryset = Patient.objects.all()

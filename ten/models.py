@@ -1,7 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
-
-from ten.helpers.tenant import get_current_tenant, get_current_user
+from django.utils.translation import gettext as _
 
 from . manangers import ForOneTenantManager, ForManyTenantsManager, CollaborationBaseManager
 
@@ -10,17 +10,22 @@ class ForOneTenant(models.Model):
     '''
     Abstract class for class with relation many to one (tenants).
     '''
-    tenant = models.ForeignKey(settings.TENANT_MODEL, verbose_name='Tenant', on_delete=models.CASCADE)
+    tenant = models.ForeignKey(settings.TENANT_MODEL, verbose_name=_('Tenant'), on_delete=models.CASCADE)
     
     objects = ForOneTenantManager()
     original = models.Manager() # The default django model manager.
 
     class Meta:
         abstract = True
-    
-    def save(self, tenant=None, *args, **kwargs):
-        if tenant is None: self.tenant = get_current_tenant()
-        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        from ten.helpers.tenant import get_current_tenant
+        try:
+            if self.tenant is None: self.tenant = get_current_tenant()
+        except ObjectDoesNotExist:
+            self.tenant = get_current_tenant()
+        
+        super(ForOneTenant, self).save(*args, **kwargs)
 
 
 class ForManyTenants(models.Model):
@@ -39,9 +44,10 @@ class ForManyTenants(models.Model):
         abstract = True
     
     def save(self, add_current_tenant=True, *args, **kwargs):
-        super().save(*args, **kwargs)
+        super(ForManyTenants, self).save(*args, **kwargs)
 
         if add_current_tenant:
+            from ten.helpers.tenant import get_current_tenant
             if get_current_tenant():
                 self.tenants.add(get_current_tenant())
             else:
@@ -81,17 +87,18 @@ class CollaborationBase(models.Model):
         for c in collaborations:
             c.deactivate(save=True)
     
-    def activate(self, user=None):
-        if user is None: user = get_current_user()
+    def activate(self):
+        #if user is None: user = get_current_user()
 
         from ten.helpers.models import Collaboration
         
-        collaborations = Collaboration.objects.filter(user=user, _is_active=True)
+        collaborations = Collaboration.objects.filter(user=self.user, _is_active=True)
         self.bulk_deactivate(collaborations)
 
         self._is_active = True
         self.save()
     
+    """
     def save(self, *args, **kwargs):
         # CREATE OR UPDATE
         if kwargs.get('tenant'): self.tenant = kwargs.get('tenant')
@@ -105,6 +112,7 @@ class CollaborationBase(models.Model):
             self.user = get_current_user()
 
         super().save(*args, **kwargs)
+    """
 
 
 class TenantBase(models.Model):
@@ -126,9 +134,19 @@ class TenantBase(models.Model):
 
     def activate(self, user=None):
         from ten.helpers.models import Collaboration
+        from ten.helpers.tenant import get_current_user
         user = get_current_user() if user is None else user
         collaboration = Collaboration.objects.get(tenant=self, user=user)
-        collaboration.activate(user)
+        collaboration.activate()
+
+    @property
+    def is_active(self, user=None):
+        from ten.helpers.tenant import get_current_tenant, get_current_user
+        from ten.helpers.models import Collaboration
+        
+        if user is None: user = get_current_user()
+        collaboration = Collaboration.objects.get(tenant=self, user=user)
+        return collaboration.is_active
     
     @property
     def owner(self):
