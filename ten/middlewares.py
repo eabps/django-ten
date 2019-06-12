@@ -156,12 +156,7 @@ class TenantMiddleware:
         return request
 
     
-    def process_response(self, request, response):    
-        try:
-            del request.user
-        except AttributeError:
-            pass
-
+    def process_response(self, request, response):
         try:
             del request.tenant
         except AttributeError:
