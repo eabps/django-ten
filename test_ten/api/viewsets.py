@@ -1,6 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+
+from drf_ten.decorators import tenant_required
 
 from test_ten.models import ScheduledService
 from .serializers import ScheduledServiceSerializer
@@ -16,6 +19,11 @@ class ByTenantFilterBackend(BaseFilterBackend):
 
         return queryset.filter(owner=request.user)
 """
+
+@tenant_required
+@api_view(['GET'])
+def fbv_test_get_tenant_decorator(request):
+    return Response({"message":"test tenant required decorator with FBV"})
 
 
 class ScheduledServiceViewSet(ModelViewSet):

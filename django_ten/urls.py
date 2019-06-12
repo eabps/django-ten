@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from test_ten.api.viewsets import ScheduledServiceViewSet
+from test_ten.api import viewsets
 
 from rest_framework import routers
 
@@ -26,11 +26,14 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 
-router = routers.DefaultRouter()
-router.register(r'scheduledservices', ScheduledServiceViewSet, basename='ScheduledService')
+router = routers.SimpleRouter()
+router.register(r'scheduledservices', viewsets.ScheduledServiceViewSet, basename='ScheduledService')
 
 api_patterns = [
     path('', include(router.urls)),
+    path('fbv_test_get_tenant_decorator/', viewsets.fbv_test_get_tenant_decorator),
+
+
     # https://github.com/davesque/django-rest-framework-simplejwt#installation
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

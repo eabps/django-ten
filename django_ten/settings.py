@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'test_ten.apps.TestTenConfig',
     'ten.apps.TenConfig',
+    'drf_ten.apps.DrfTenConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,9 +128,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = 'www.google.com'
-LOGOUT_REDIRECT_URL = 'www.facebook.com'
-LOGIN_URL = 'www.yahoo.com'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/'
 
 ###### Simple JWT ######
 SIMPLE_JWT = {
