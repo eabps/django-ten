@@ -164,6 +164,7 @@ REST_FRAMEWORK = {
         #'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # https://github.com/davesque/django-rest-framework-simplejwt
     ),
+    'EXCEPTION_HANDLER': 'drf_ten.decorators.custom_exception_handler',
 }
 
 ###### DJANGO TEN ######
@@ -171,6 +172,6 @@ COLLABORATION_MODEL = 'test_ten.Collaboration'
 TENANT_MODEL = 'test_ten.Tenant'
 SELECT_TENANT_URL = '/tenant/select/'
 SET_TENANT = 'by_url' # by_url or by_user
+SLUG_TENANT = lambda url : url.split(".")[1]
 
-from test_ten.helpers import get_slug
-SLUG_TENANT = get_slug
+###### DRF DJANGO TEN ######

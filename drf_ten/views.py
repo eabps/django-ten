@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from rest_framework.decorators import api_view
 
-# Create your views here.
+from . exceptions import TenantNotDefined
+
+
+@api_view()
+def tenant_not_defined(request):
+	raise TenantNotDefined()
