@@ -153,7 +153,7 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
+    'SLIDING_TOKEN_LIFETIME': datetime.timedelta(minutes=15),
     'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=1),
 }
 
@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
         #'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # https://github.com/davesque/django-rest-framework-simplejwt
     ),
-    'EXCEPTION_HANDLER': 'drf_ten.decorators.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'drf_ten.views.custom_exception_handler',
 }
 
 ###### DJANGO TEN ######
@@ -174,4 +174,5 @@ SELECT_TENANT_URL = '/tenant/select/'
 SET_TENANT = 'by_url' # by_url or by_user
 SLUG_TENANT = lambda url : url.split(".")[1]
 
-###### DRF DJANGO TEN ######
+###### DRF TEN ######
+DRF_TEN_NAMESPACE = 'api:drf_ten' # default is 'drf_ten'

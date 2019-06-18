@@ -29,7 +29,7 @@ from rest_framework_simplejwt.views import (
 router = routers.SimpleRouter()
 router.register(r'scheduledservices', viewsets.ScheduledServiceViewSet, basename='ScheduledService')
 
-api_patterns = [
+api_patterns = ([
     path('', include(router.urls)),
     path('fbv_test_get_tenant_decorator/', viewsets.fbv_test_get_tenant_decorator),
 
@@ -37,16 +37,14 @@ api_patterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-
-    path('drf-ten/', include('drf_ten.urls')),
-]
+    path('drf-ten/', include('drf_ten.urls', namespace='drf_ten')),
+], 'api')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('', include('test_ten.urls'), name='test_ten'),
     
-    #path('v1/', include(api_patterns)),
-    path('v1/', include(api_patterns), name='api'),
-    #url(r'^api/', include((router.urls, 'app_name'), namespace='instance_name')),
+    path('', include('test_ten.urls'), name='test_ten'),
+    path('v1/', include(api_patterns, namespace='api')),
+    #path('drf-ten/', include('drf_ten.urls', namespace='drf_ten')),
 ]

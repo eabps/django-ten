@@ -21,9 +21,9 @@ class ByTenantFilterBackend(BaseFilterBackend):
 """
 
 @tenant_required
-@api_view(['GET'])
+@api_view()
 def fbv_test_get_tenant_decorator(request):
-    return Response({"message":"test tenant required decorator with FBV"})
+    return Response({"message":"Ok. sucess test tenant required decorator with FBV"})
 
 
 class ScheduledServiceViewSet(ModelViewSet):
