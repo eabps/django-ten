@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 from ten.decorators import tenant_required
 from ten.helpers.tenant import get_tenants
+from ten.exceptions import NotActivateTenant
 
 from . models import Collaboration, Tenant, ScheduledService, Patient
 from . forms import CreateUserForm, TenantForm, PatientForm, ScheduledServiceForm
@@ -149,7 +150,10 @@ def scheduled_service_list(request):
 
 def tenant_active(request, pk):
     tenant = Tenant.objects.get(id=int(pk))
-    tenant.activate()
+    try:
+        tenant.activate()
+    except NotActivateTenant:
+        pass
 
     return redirect('/')
     

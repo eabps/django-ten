@@ -69,7 +69,7 @@ def get_user(request):
 
 
 def get_tenant(request):
-    print('GET TENANT')
+    #print('GET TENANT')
     tenant = None
 
     set_tenant = getattr(settings, 'SET_TENANT')
@@ -90,7 +90,7 @@ def get_tenant(request):
             print('NO USER')
     
     if set_tenant == 'by_url':
-        print(':::: TENANT BY URL ::::')
+
         print('request.get_host(): ', request.get_host())
         from ten.helpers.models import Tenant
         slug = settings.SLUG_TENANT(request.get_host())
@@ -100,7 +100,6 @@ def get_tenant(request):
         except Tenant.DoesNotExist:
             tenant = tenant
     
-    print('tenant: ', tenant)
     return tenant
 
 
@@ -141,17 +140,21 @@ class TenantMiddleware:
             print('BY URL')
             request.tenant = tenant
         
-        print('tenant: ', request.tenant)
-        print('user: ', request.user)
         self._threadmap[threading.get_ident()]['tenant'] = request.tenant
-
-        try:
-            if tenant is not None:
-                from ten.helpers.models import Collaboration
+        
+        from ten.helpers.models import Collaboration
+        if settings.SET_TENANT == 'by_url':
+            if not user.is_anonymous:
+                collaborations = Collaboration.objects.filter(user=user, _is_active=True)
+                for c in collaborations:
+                    c.deactivate(save=True)
+        
+        if tenant is not None:
+            try:
                 collaboration = Collaboration.objects.get(tenant=tenant, user=user)
                 collaboration.activate()
-        except (Collaboration.DoesNotExist, TypeError):
-            pass
+            except (Collaboration.DoesNotExist, TypeError):
+                pass
 
         return request
 

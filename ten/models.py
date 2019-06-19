@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.utils.translation import gettext as _
 
+from . exceptions import NotActivateTenant
 from . manangers import ForOneTenantManager, ForManyTenantsManager, CollaborationBaseManager
 
 
@@ -132,12 +133,19 @@ class TenantBase(models.Model):
         import uuid
         return str(uuid.uuid4())
 
-    def activate(self, user=None):
+    def activate(self, user=None, force=False):
+        from ten.helpers.tenant import get_current_user, get_current_tenant
         from ten.helpers.models import Collaboration
-        from ten.helpers.tenant import get_current_user
-        user = get_current_user() if user is None else user
-        collaboration = Collaboration.objects.get(tenant=self, user=user)
-        collaboration.activate()
+
+        if settings.SET_TENANT == 'by_user': force = True
+
+        if self == get_current_tenant() or force is True:
+            user = get_current_user() if user is None else user
+            collaboration = Collaboration.objects.get(tenant=self, user=user)
+            collaboration.activate()
+        else:
+            raise NotActivateTenant("{tenant} not activate. If settings.SET_TENANT is 'by_url', to activate {tenant} imcompatible with url use {tenant}.activate(force=True)".format(tenant=self.__class__.__name__))
+        
 
     @property
     def is_active(self, user=None):
