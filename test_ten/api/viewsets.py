@@ -4,10 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 
 from drf_ten.decorators import tenant_required
+from drf_ten.permissions import TenantRequiredPermissions
 
 from test_ten.models import ScheduledService
 from .serializers import ScheduledServiceSerializer
-
 
 
 """
@@ -30,14 +30,14 @@ class ScheduledServiceViewSet(ModelViewSet):
     queryset = ScheduledService.objects.all()
     serializer_class = ScheduledServiceSerializer
     #authentication_classes = (TokenAuthentication)
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, TenantRequiredPermissions)
 
-    
     def get_queryset(self):
         queryset = ScheduledService.original.all()
         from ten.helpers.tenant import get_current_tenant
 
-        return queryset.filter(tenant=get_current_tenant())
+        #return queryset.filter(tenant=get_current_tenant())
+        return queryset
     
 
     def create(self, request, *args, **kwargs):

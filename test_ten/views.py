@@ -156,4 +156,3 @@ def tenant_active(request, pk):
         pass
 
     return redirect('/')
-    
