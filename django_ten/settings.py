@@ -165,6 +165,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # https://github.com/davesque/django-rest-framework-simplejwt
     ),
     'EXCEPTION_HANDLER': 'drf_ten.views.custom_exception_handler',
+    #'DEFAULT_FILTER_BACKENDS': ('drf_ten.filters.TenantFilter',),
 }
 
 ###### DJANGO TEN ######

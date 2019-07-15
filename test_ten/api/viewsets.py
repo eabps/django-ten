@@ -10,20 +10,13 @@ from test_ten.models import ScheduledService
 from .serializers import ScheduledServiceSerializer
 
 
-"""
-from rest_framework.filters import BaseFilterBackend
-
-
-class ByTenantFilterBackend(BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
-
-        return queryset.filter(owner=request.user)
-"""
-
 @tenant_required
 @api_view()
 def fbv_test_get_tenant_decorator(request):
-    return Response({"message":"Ok. sucess test tenant required decorator with FBV"})
+    schedule_services = ScheduledService.objects.all()
+    schedule_service_serializer = ScheduledServiceSerializer(schedule_services, many=True)
+    data = schedule_service_serializer.data
+    return Response(data)
 
 
 class ScheduledServiceViewSet(ModelViewSet):
@@ -32,12 +25,11 @@ class ScheduledServiceViewSet(ModelViewSet):
     #authentication_classes = (TokenAuthentication)
     permission_classes = (IsAuthenticated, TenantRequiredPermissions)
 
-    def get_queryset(self):
+    """def get_queryset(self):
         queryset = ScheduledService.original.all()
         from ten.helpers.tenant import get_current_tenant
 
-        #return queryset.filter(tenant=get_current_tenant())
-        return queryset
+        return queryset.filter(tenant=get_current_tenant())"""
     
 
     def create(self, request, *args, **kwargs):
