@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 
-from drf_ten.decorators import tenant_required
-from drf_ten.permissions import TenantRequiredPermissions
+from ten.drf.decorators import tenant_required
+from ten.drf.permissions import TenantRequiredPermissions
 
 from test_ten.models import ScheduledService
 from .serializers import ScheduledServiceSerializer

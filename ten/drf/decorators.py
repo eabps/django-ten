@@ -2,7 +2,7 @@ import functools
 
 from django.shortcuts import redirect
 
-from drf_ten.exceptions import TenantNotDefined
+from .exceptions import TenantNotDefined
 
 from django.conf import settings
 

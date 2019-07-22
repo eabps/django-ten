@@ -10,14 +10,14 @@ class ForOneTenantManager(models.Manager):
 
     def get_queryset(self, tenant=None, *args, **kwargs):
         print('*** MANAGER get_queryset by ForOneTenantManager ***')
-        tenant = get_current_tenant() if tenant is None else tenant
+        if tenant is None: tenant = get_current_tenant()
 
         print('Tenant IN MANAGER: ', tenant)
 
-        #if tenant:
-        #    return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
-        
-        return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
+        if tenant:
+            return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
+        else:
+            return super().get_queryset(*args, **kwargs)
 
 
 class ForManyTenantsManager(models.Manager):
@@ -31,8 +31,8 @@ class ForManyTenantsManager(models.Manager):
             collaborations = Collaboration.original.filter(user=tenant.owner, owner=True)
             tenants = set([c.tenant for c in collaborations])
             return super(ForManyTenantsManager, self).get_queryset(*args, **kwargs).filter(tenants__in=tenants)
-        
-        return super(ForManyTenantsManager, self).get_queryset(*args, **kwargs).none()
+        else:
+            return super(ForManyTenantsManager, self).get_queryset(*args, **kwargs)
     
     def create(self, **kwargs):
         """

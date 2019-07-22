@@ -7,14 +7,20 @@ from . exceptions import NotActivateTenant
 from . manangers import ForOneTenantManager, ForManyTenantsManager, CollaborationBaseManager
 
 
-class ForOneTenant(models.Model):
+class ForTenantBase(models.Model):
+    original = models.Manager() # The default django model manager.
+
+    class Meta:
+        abstract = True
+
+
+class ForOneTenant(ForTenantBase):
     '''
     Abstract class for class with relation many to one (tenants).
     '''
     tenant = models.ForeignKey(settings.TENANT_MODEL, verbose_name=_('Tenant'), on_delete=models.CASCADE)
     
     objects = ForOneTenantManager()
-    original = models.Manager() # The default django model manager.
 
     class Meta:
         abstract = True
@@ -29,7 +35,7 @@ class ForOneTenant(models.Model):
         super(ForOneTenant, self).save(*args, **kwargs)
 
 
-class ForManyTenants(models.Model):
+class ForManyTenants(ForTenantBase):
     # Falta sobrescrever o add (obj.tenants.add()) de modo que seja possível add somente tenants do mesmo proprientário
     '''
     Abstract class for class with relation many to many (tenants).
@@ -39,7 +45,6 @@ class ForManyTenants(models.Model):
     #is_shared = models.BooleanField(default=True, verbose_name='Is shared')
 
     objects = ForManyTenantsManager()
-    original = models.Manager() # The default django model manager.
 
     class Meta:
         abstract = True

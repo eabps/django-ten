@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'test_ten.apps.TestTenConfig',
     'ten.apps.TenConfig',
-    'drf_ten.apps.DrfTenConfig',
 ]
 
 MIDDLEWARE = [
@@ -164,16 +163,14 @@ REST_FRAMEWORK = {
         #'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # https://github.com/davesque/django-rest-framework-simplejwt
     ),
-    'EXCEPTION_HANDLER': 'drf_ten.views.custom_exception_handler',
-    #'DEFAULT_FILTER_BACKENDS': ('drf_ten.filters.TenantFilter',),
+    'EXCEPTION_HANDLER': 'ten.views.custom_exception_handler',
+    'DEFAULT_FILTER_BACKENDS': ['ten.drf.filters.TenFilterBackend'],
 }
 
 ###### DJANGO TEN ######
 COLLABORATION_MODEL = 'test_ten.Collaboration'
 TENANT_MODEL = 'test_ten.Tenant'
 SELECT_TENANT_URL = '/tenant/select/'
-SET_TENANT = 'by_user' # by_url or by_user
+SET_TENANT = 'by_url' # by_url or by_user
 SLUG_TENANT = lambda url : url.split(".")[1]
-
-###### DRF TEN ######
 DRF_TEN_NAMESPACE = 'api:drf_ten' # default is 'drf_ten'

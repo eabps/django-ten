@@ -37,7 +37,7 @@ api_patterns = ([
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('drf-ten/', include('drf_ten.urls', namespace='drf_ten')),
+    path('drf-ten/', include('ten.urls', namespace='ten')),
 ], 'api')
 
 urlpatterns = [
