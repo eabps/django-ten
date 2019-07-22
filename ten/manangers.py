@@ -5,18 +5,19 @@ from ten.helpers.tenant import get_current_tenant, get_current_user
 
 class ForOneTenantManager(models.Manager):
     def get_original_queryset(self, *args, **kwargs):
+        print('>> get_original_queryset')
         return super(ForOneTenantManager, self).get_queryset(*args, **kwargs)
 
     def get_queryset(self, tenant=None, *args, **kwargs):
+        print('*** MANAGER get_queryset by ForOneTenantManager ***')
         tenant = get_current_tenant() if tenant is None else tenant
 
-        print('********** get_queryset by ForOneTenantManager **********')
-        print('Tenant:', tenant)
+        print('Tenant IN MANAGER: ', tenant)
 
-        if tenant:
-            return super(ForOneTenantManager, self).get_queryset(*args, **kwargs).filter(tenant=tenant)
+        #if tenant:
+        #    return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
         
-        return super(ForOneTenantManager, self).get_queryset(*args, **kwargs).none()
+        return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
 
 
 class ForManyTenantsManager(models.Manager):
@@ -54,10 +55,10 @@ class CollaborationBaseManager(models.Manager):
         return super(CollaborationBaseManager, self).get_queryset(*args, **kwargs)
     
     def get_queryset(self, user=None, *args, **kwargs):
-        print(get_current_user())
+        #print(get_current_user())
         user = get_current_user() if user is None else user
 
-        print('UUSER: ', user)
+        #print('UUSER: ', user)
 
         if user and not user.is_anonymous:
             return super(CollaborationBaseManager, self).get_queryset(*args, **kwargs).filter(user=user)

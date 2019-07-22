@@ -13,8 +13,8 @@ from . forms import CreateUserForm, TenantForm, PatientForm, ScheduledServiceFor
 
 
 def home(request):
-    print('home')
-    print('request: ', request)
+    #print('home')
+    #print('request: ', request)
     template_name = 'home.html'
     context = {
         'title': 'Home',
@@ -22,7 +22,7 @@ def home(request):
     }
     
     if request.user.is_authenticated:
-        print('authenticated')
+        #print('authenticated')
         context['tenants'] = get_tenants()
 
     return render(request, template_name, context)
@@ -94,7 +94,8 @@ def patient_create(request):
             #Patient.objects.create(name='Za')
             #Patient.objects.create(name='Ze', add_current_tenant=False)
         else:
-            print('Form is not valid')
+            pass
+            #print('Form is not valid')
 
     form = PatientForm()
     
@@ -111,19 +112,21 @@ def scheduled_service_create(request):
         'subtitle': 'Create new scheduled service',
     }
 
-    print('RM: ', request.method)
+    #print('RM: ', request.method)
 
     if request.method == 'POST':
-        print('POSSSSST')
+        #print('POSSSSST')
         form = ScheduledServiceForm(request.POST)
 
         if form.is_valid():
             form.save()
-            print('SAVVVVVE')
+            #print('SAVVVVVE')
         else:
-            print('Form is not valid')
+            pass
+            #print('Form is not valid')
     else:
-        print('NOTTTTTTTTT POST')
+        pass
+        #print('NOTTTTTTTTT POST')
 
 
     form = ScheduledServiceForm()
@@ -142,7 +145,7 @@ def scheduled_service_list(request):
     }
 
     scheduled_services = ScheduledService.objects.all()
-    print(scheduled_services)
+    #print(scheduled_services)
     context['scheduled_services'] = scheduled_services
 
     return render(request, template_name, context)

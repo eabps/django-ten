@@ -13,6 +13,7 @@ def get_tenants(user=None):
     return [c.tenant for c in collaborations]
 
 def get_current_tenant():
+    print('*** get_current_tenant in tenant.py ***')
     from ten.middlewares import TenantMiddleware
     return TenantMiddleware.get_current_tenant()
 
@@ -32,7 +33,7 @@ def set_currrent_tenant(user):
     try:
         tenant = TenantMiddleware.set_tenant(user=user)
     except NotActivateTenant:
-        print('Redirect to Tenant URL')
+        #print('Redirect to Tenant URL')
         return redirect(settings.TENANT_URL)
     return TenantMiddleware.set_tenant(user=user)
 """

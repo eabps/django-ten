@@ -172,7 +172,7 @@ REST_FRAMEWORK = {
 COLLABORATION_MODEL = 'test_ten.Collaboration'
 TENANT_MODEL = 'test_ten.Tenant'
 SELECT_TENANT_URL = '/tenant/select/'
-SET_TENANT = 'by_url' # by_url or by_user
+SET_TENANT = 'by_user' # by_url or by_user
 SLUG_TENANT = lambda url : url.split(".")[1]
 
 ###### DRF TEN ######
