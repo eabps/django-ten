@@ -1,5 +1,4 @@
 # Ref: https://github.com/hugobessa/django-shared-schema-tenants/blob/dev/shared_schema_tenants/middleware.py
-
 import threading
 
 from django.contrib.auth.middleware import get_user as get_user_by_django
@@ -18,9 +17,6 @@ def get_user_by_token(request):
     except IndexError:
         token_flag = None
         token = None
-
-    #print('TOKEN: ', token)
-    #print('FLAG: ', token_flag)
 
     if token_flag == 'simplejwt':
         from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -44,6 +40,7 @@ def get_user_by_token(request):
         raise NotImplementedError('drfpasswordless is not implemented yet at django-ten')
     
     if user is None: user = AnonymousUser()
+    
     return user
 
 
@@ -52,24 +49,20 @@ def get_user(request):
 
     http_authorization = request.META.get('HTTP_AUTHORIZATION', None)
     
-    #print('http_authorization: ', http_authorization)
+    # API
     if http_authorization is not None:
-        print('*** API ***')
         user = get_user_by_token(request)
 
+    # SESSION
     if hasattr(request, 'user') and user is None:
-        print('*** SESSION ***')
-        # from ten.helpers.models import User
         user = get_user_by_django(request)
         
     if user is None: user = AnonymousUser()
-    #print('get_user: ', user)
     
     return user
 
 
 def get_tenant(request):
-    ##print('GET TENANT')
     tenant = None
 
     set_tenant = getattr(settings, 'SET_TENANT')
@@ -77,35 +70,31 @@ def get_tenant(request):
     if set_tenant == 'by_user':
         user = get_user(request)
 
-        print('>>:', user)
-
         if not user.is_anonymous:
             from ten.helpers.models import Collaboration
             try:
                 collaboration = Collaboration.original.get(user=user, _is_active=True)
                 tenant = collaboration.tenant
             except Collaboration.DoesNotExist:
-                print('opa 1')
-        else:
-            print('opa 2')
+                tenant = tenant
     
-    if set_tenant == 'by_url':
-        #print('request.get_host(): ', request.get_host())
+    elif set_tenant == 'by_url':
         from ten.helpers.models import Tenant
         slug = settings.SLUG_TENANT(request.get_host())
-        #print('SLUG: ', slug)
+
         try:
             tenant = Tenant.objects.get(slug=slug)
         except Tenant.DoesNotExist:
             tenant = tenant
     
-    print('>> middleware.get_tenant', tenant)
     return tenant
 
 
 class TenantMiddleware:
     # https://docs.djangoproject.com/pt-br/2.1/topics/http/middleware/#writing-your-own-middleware
 
+    _threadmap = {}
+    
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
@@ -120,48 +109,33 @@ class TenantMiddleware:
         # the view is called.
         return self.process_response(request, response)
     
-    _threadmap = {}
-  
     def process_request(self, request):
         request.set_tenant = getattr(settings, 'SET_TENANT')
 
         user = SimpleLazyObject(lambda: get_user(request))
         tenant = SimpleLazyObject(lambda: get_tenant(request))
 
-        print('>> tenant in process_request: ', tenant, type(tenant))
-
         request.user = user
 
         if request.set_tenant == 'by_user':
-            print('!! BY USER')
             request.tenant = None if user.is_anonymous else tenant
-
         elif request.set_tenant == 'by_url':
-            print('!! BY URL')
             request.tenant = tenant
+
+            if request.tenant is not None:
+                from ten.helpers.models import Collaboration
+
+                try:
+                    collaboration = Collaboration.objects.get(tenant=tenant, user=user)
+                    collaboration.activate()
+                except (Collaboration.DoesNotExist, TypeError):
+                    pass
         
-        self._threadmap[threading.get_ident()] = {'user': request.user, 'tenant': request.tenant}
-        print('### ', self._threadmap[threading.get_ident()])
-        
-        from ten.helpers.models import Collaboration
-        if settings.SET_TENANT == 'by_url':
-            if not user.is_anonymous:
-                collaborations = Collaboration.objects.filter(user=user, _is_active=True)
-                for c in collaborations:
-                    c.deactivate(save=True)
-        
-        if tenant is not None:
-            try:
-                collaboration = Collaboration.objects.get(tenant=tenant, user=user)
-                collaboration.activate()
-            except (Collaboration.DoesNotExist, TypeError):
-                pass
+        self._threadmap[threading.get_ident()] = {'user': request.user, 'tenant': request.tenant, 'is_web': True}
 
         return request
 
-    
     def process_response(self, request, response):
-        print('<<<<<< process_response')
         try:
             del request.tenant
         except AttributeError:
@@ -187,8 +161,6 @@ class TenantMiddleware:
     
     @classmethod
     def get_current_tenant(self):
-        #print('!!!! dmap[threading.get_ident()]:', cls._threadmap[threading.get_ident()])
-        print("!!!!!!!! ", self._threadmap)
         try:
             return self._threadmap[threading.get_ident()]['tenant']
         except KeyError:
@@ -196,8 +168,14 @@ class TenantMiddleware:
     
     @classmethod
     def get_current_user(self):
-        print("!!!!!!!! ", self._threadmap)
         try:
             return self._threadmap[threading.get_ident()]['user']
         except KeyError:
             return None
+    
+    @classmethod
+    def is_web(self):
+        try:
+            return self._threadmap[threading.get_ident()]['is_web']
+        except KeyError:
+            return False

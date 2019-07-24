@@ -136,7 +136,8 @@ def scheduled_service_create(request):
     return render(request, template_name, context)
 
 
-@tenant_required
+#@tenant_required
+#   @login_required
 def scheduled_service_list(request):
     template_name ='scheduled_service_list.html'
     context = {

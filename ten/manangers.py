@@ -1,23 +1,22 @@
 from django.db import models
 
-from ten.helpers.tenant import get_current_tenant, get_current_user
+from ten.helpers.tenant import get_current_tenant, get_current_user, is_web
 
 
 class ForOneTenantManager(models.Manager):
     def get_original_queryset(self, *args, **kwargs):
-        print('>> get_original_queryset')
         return super(ForOneTenantManager, self).get_queryset(*args, **kwargs)
 
     def get_queryset(self, tenant=None, *args, **kwargs):
-        print('*** MANAGER get_queryset by ForOneTenantManager ***')
         if tenant is None: tenant = get_current_tenant()
-
-        print('Tenant IN MANAGER: ', tenant)
 
         if tenant:
             return super().get_queryset(*args, **kwargs).filter(tenant=tenant)
         else:
-            return super().get_queryset(*args, **kwargs)
+            if is_web():
+                return super().get_queryset(*args, **kwargs).none()
+            else:
+                return self.get_original_queryset(*args, **kwargs)
 
 
 class ForManyTenantsManager(models.Manager):
