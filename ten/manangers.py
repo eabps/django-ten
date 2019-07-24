@@ -54,10 +54,7 @@ class CollaborationBaseManager(models.Manager):
         return super(CollaborationBaseManager, self).get_queryset(*args, **kwargs)
     
     def get_queryset(self, user=None, *args, **kwargs):
-        #print(get_current_user())
         user = get_current_user() if user is None else user
-
-        #print('UUSER: ', user)
 
         if user and not user.is_anonymous:
             return super(CollaborationBaseManager, self).get_queryset(*args, **kwargs).filter(user=user)
